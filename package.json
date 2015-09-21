@@ -1,0 +1,16 @@
+{
+  "name": "ya-pdf-viewer",
+  "description": "",
+  "version": "0.0.1",
+  "license": "APSL-2.0",
+  "dependencies": {
+    "angular": "^1.5.0-beta.0",
+    "pdfjs-dist": "^1.1.469"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-jshint": "^1.11.2",
+    "gulp-uglify": "^1.4.1"
+  }
+}
