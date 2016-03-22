@@ -1,182 +1,297 @@
 (function () {
-	'use strict';
-	angular.module('ya.pdf')
-		.run(['$templateCache', onDirectiveRun])
-	/**
-	 * @ngdoc directive
-	 * @name yaPdfToolbar
-	 *
-	 * @author Артём
-	 * @version 1.0
-	 *
-	 * @param delegateHandle {string} Имя делегата для связи с просмотрщиком
-	 * @param [templateUrl] {string} Ссылка на шаблон панели
-	 *
-	 * @description
-	 * Директива для туллбара управления директивой wsPdfViewer.
-	 * Связь осуществляется через именованный делегат
-	 *
-	 * @restrict E
-	 *
-	 */
-		.directive('yaPdfToolbar', ['$timeout', 'wsPdfDelegate', yaPdfToolbar]);
+    'use strict';
+    angular.module('ya.pdf')
+        .run(['$templateCache', onDirectiveRun])
+    /**
+     * @ngdoc directive
+     * @name yaPdfToolbar
+     *
+     * @author asborisov
+     * @version 1.0
+     *
+     * @param [templateUrl] {string} Ссылка на шаблон панели
+     *
+     * @description
+     * Директива для туллбара управления директивой yaPdfViewer
+     *
+     * @restrict E
+     */
+        .directive('yaPdfToolbar', yaPdfToolbar);
 
-	/**
-	 * Добавляем дефолтный шаблон нанельки навигации по документу к templateCache
-	 */
-	function onDirectiveRun($templateCache) {
-		$templateCache.put('yaPdfToolbarTemplate.html',
-			'<div>' +
-			'<div class="btn-group pdf-arrow">' +
-			'<i class="fa fa-arrow-left fa-lg advanced-input-icon" ng-click="prev()"></i>' +
-			'<i class="fa fa-arrow-right fa-lg advanced-input-icon" ng-click="next()"></i>' +
-			'<i class="fa fa-search-minus fa-lg advanced-input-icon" ng-click="zoomOut()"></i>' +
-			'<i class="fa fa-search-plus fa-lg advanced-input-icon" ng-click="zoomIn()"></i>' +
-			'</div>' +
-			'<div class="btn-group">' +
-			'<input type="text" class="form-control pdf-current-page" min=1 ng-model="currentPage" ng-change="goToPage()"> / {{pageCount()}}' +
-			'</div>' +
-			'</div>')
-	}
+    /**
+     * Добавляем дефолтный шаблон панельки навигации по документу в $templateCache
+     */
+    function onDirectiveRun($templateCache) {
+        $templateCache.put('yaPdfToolbarTemplate.html',
+            '<div class="{{::classes.toolbar}}">' +
+            '   <div class="btn-group">' +
+            '       <i class="fa fa-arrow-left fa-lg" ng-click="prev()"></i>' +
+            '       <i class="fa fa-arrow-right fa-lg" ng-click="next()"></i>' +
+            '       <i class="fa fa-search-minus fa-lg" ng-click="zoomOut()"></i>' +
+            '       <i class="fa fa-search-plus fa-lg" ng-click="zoomIn()"></i>' +
+            '   </div>' +
+            '   <div class="btn-group">' +
+            '       <input type="text" class="form-control pdf-current-page" min=1 ng-model="currentPage" ' +
+            '       ng-change="goToPage()" ya-pdf-page-number=""  ng-model-options="{updateOn: \'keypress\'}"> / {{pagesCountValue}}' +
+            '   </div>' +
+            '   <div class="btn-group">' +
+            '       <div ng-click="toggleOutline()">' +
+            '           <i class="fa fa-list fa-lg"></i>' +
+            '       </div>' +
+            '   </div>' +
+            '   <div class="btn-group search-group" ng-init="focused = false">' +
+            '       <div class="search-field" ng-class="{\'search-field-focused\': focused, \'search-field-found\': searchText.length}">' +
+            '         <form ng-submit="find(searchText)">' +
+            '           <div class="search-counter">{{ currentSelected() }} / {{ foundCount() }}</div>' +
+            '           <input type="text" required="required" ng-model="searchText" placeholder=""' +
+            '                  ng-focus="focused = true"' +
+            '                  ng-blur="focused = false"' +
+            '                  ng-change="find(searchText)"' +
+            '                  ng-model-options="{ debounce: 500 }">' +
+            '           <div class="search-prev" ng-click="findPrev()">' +
+            '               <i class="fa fa-chevron-up"></i>' +
+            '           </div>' +
+            '           <div class="search-next" ng-click="find(searchText)">' +
+            '               <i class="fa fa-chevron-down"></i>' +
+            '           </div>' +
+            '       </form>' +
+            '      </div>' +
+            '   </div>' +
+            '</div>')
+    }
 
-	/**
-	 * Функция для получения директивы yaPdfToolbar
-	 * @param $timeout
-	 * @param wsPdfDelegate
-	 * @returns {{restrict: string, scope: {delegateHandle: string}, templateUrl: Function, controller: *[]}}
-	 */
-	function yaPdfToolbar($timeout, wsPdfDelegate) {
-		return {
-			restrict: 'E',
-			scope: {
-				/**
-				 * Имя делегата для связи с просмотрщиком
-				 */
-				delegateHandle: '@'
-			},
-			templateUrl: function (element, attr) {
-				return attr.templateUrl || 'yaPdfToolbarTemplate.html';
-			},
-			controller: ['$scope', function ($scope) {
-				/**
-				 * Текущая страницу
-				 * @type {number}
-				 */
-				$scope.currentPage = 1;
-				/**
-				 * Текущий масштаб
-				 */
-				$scope.scale = 1;
-				/**
-				 * Кол-во страниц
-				 * @type {number}
-				 */
-				$scope.pagesCountValue = 0;
+    yaPdfToolbar.$inject = ['ya.pdf.communicationService', 'ya.pdf.viewerService', 'ya.pdf.config'];
 
-				$scope.prev = goPrevious;
-				$scope.next = goNext;
-				$scope.zoomIn = zoomIn;
-				$scope.zoomOut = zoomOut;
-				$scope.setScale = setScale;
-				$scope.goToPage = goToSelectedPage;
-				$scope.pageCount = getPageCount;
+    /**
+     * Функция для получения директивы yaPdfToolbar
+     * @returns {{restrict: string, templateUrl: Function, link: Function}}
+     */
+    function yaPdfToolbar(communicationService, viewerService, config) {
+        return {
+            restrict: 'E',
+            templateUrl: function (element, attr) {
+                return attr.templateUrl || 'yaPdfToolbarTemplate.html';
+            },
+            link: function (scope, element) {
+                // Основной контейнер
+                var pdfContainerDiv;
+                /**
+                 * @type {Boolean}
+                 */
+                var fullScreen = false;
+                /**
+                 * @type {Boolean}
+                 */
+                var outline = false;
+                scope.classes = config.classes;
+                /**
+                 * Текущая страницу
+                 * @type {Number}
+                 */
+                scope.currentPage = 1;
+                /**
+                 * Текущий масштаб
+                 * @type {Object}
+                 */
+                scope.scale = {
+                    name: '100%',
+                    value: 1
+                };
+                /**
+                 * Кол-во страниц
+                 * @type {Number}
+                 */
+                scope.pagesCountValue = 0;
+                /**
+                 * Текст для поиска
+                 * @type {String}
+                 */
+                scope.searchText = '';
 
-				$scope.init = init;
+                scope.prev = goPrevious;
+                scope.next = goNext;
+                scope.zoomIn = zoomIn;
+                scope.zoomOut = zoomOut;
+                scope.setScale = setScale;
+                scope.goToPage = goToSelectedPage;
+                scope.toggleFullScreen = toggleFullScreen;
+                scope.toggleThumbnails = viewerService.toggleThumbnails;
+                scope.toggleOutline = toggleOutline;
+                scope.isOutlineDisabled = false;
+                scope.downloadDocument = viewerService.downloadDocument;
+                scope.find = viewerService.findText;
+                scope.findPrev = viewerService.findPrev;
+                scope.currentSelected = viewerService.currentSelected;
+                scope.foundCount = viewerService.foundCount;
 
-				/**
-				 * Инициализация
-				 */
-				function init() {
-					getScale();
-				}
+                scope.getCurrentPage = getCurrentPage;
 
-				/**
-				 * Переход на предыдущую страницу
-				 */
-				function goPrevious() {
-					if ($scope.currentPage > 1) {
-						$scope.currentPage--;
-						goToPage($scope.currentPage);
-					}
-				}
+                init();
 
-				/**
-				 * Переход на следующую страницу
-				 */
-				function goNext() {
-					if ($scope.currentPage && $scope.currentPage < $scope.pagesCountValue) {
-						$scope.currentPage++;
-						goToPage($scope.currentPage);
-					}
-				}
+                /**
+                 * Инициализация
+                 */
+                function init() {
+                    fullScreen = false;
+                    scope.isOutlineDisabled = false;
+                    communicationService.register({
+                        onDocumentLoaded: documentLoaded,
+                        onOutlineDisabled: onOutlineDisabled,
+                        onThumbnailsToggled: toggleThumbnails
+                    });
+                }
 
-				/**
-				 * Переход на определенную страницу
-				 */
-				function goToSelectedPage() {
-					goToPage($scope.currentPage);
-				}
+                function documentLoaded() {
+                    pdfContainerDiv = angular.element('.' + config.classes.container);
+                    scope.pagesCountValue = viewerService.getPagesCount();
+                }
 
-				/**
-				 * Переход на выбранную страницу
-				 * @param page Номер страницы
-				 */
-				function goToPage(page) {
-					// Проверяем что такая страница есть
-					if (page && parseInt(page) && page <= $scope.pagesCountValue && page > 0) {
-						wsPdfDelegate.$getByHandle($scope.delegateHandle).goToPage(page);
-					}
-				}
+                function toggleFullScreen() {
+                    fullScreen = !fullScreen;
+                    if (fullScreen) {
+                        element.addClass(config.classes.fullScreen);
+                    } else {
+                        element.removeClass(config.classes.fullScreen);
+                    }
+                    communicationService.execute('onFullScreenToggled', fullScreen);
+                }
 
-				/**
-				 * Получаем кол-во страниц
-				 * @returns {number}
-				 */
-				function getPageCount() {
-					$scope.pagesCountValue = wsPdfDelegate.$getByHandle($scope.delegateHandle).getPageCount();
-					return $scope.pagesCountValue;
-				}
+                function onOutlineDisabled(value) {
+                    scope.isOutlineDisabled = value;
+                }
 
-				/**
-				 * Приближение
-				 */
-				function zoomIn() {
-					$scope.scale = wsPdfDelegate.$getByHandle($scope.delegateHandle).zoomIn();
-				}
+                function toggleOutline() {
+                    if (scope.isOutlineDisabled) {
+                        return;
+                    }
+                    outline = !outline;
+                    communicationService.execute('onOutlineToggled', outline);
+                }
 
-				/**
-				 * Отдаление
-				 */
-				function zoomOut() {
-					$scope.scale = wsPdfDelegate.$getByHandle($scope.delegateHandle).zoomOut();
-				}
+                /**
+                 * Переход на предыдущую страницу
+                 */
+                function goPrevious() {
+                    if (scope.currentPage > 1) {
+                        scope.currentPage--;
+                        goToPage(scope.currentPage);
+                    }
+                }
 
-				/**
-				 * Синхронизировать масштаб.
-				 * Таймаут чтобы убедиться в том что вьювер уже есть
-				 */
-				function getScale() {
-					$scope.timeout = $timeout(function () {
-						$scope.scale = wsPdfDelegate.$getByHandle($scope.delegateHandle).getCurrentScale();
-						$timeout.cancel($scope.timeout);
-					}, 500);
-				}
+                /**
+                 * Переход на следующую страницу
+                 */
+                function goNext() {
+                    if (scope.currentPage && scope.currentPage < scope.pagesCountValue) {
+                        scope.currentPage++;
+                        goToPage(scope.currentPage);
+                    }
+                }
 
-				/**
-				 * Обновление масштаба
-				 */
-				function setScale() {
-					var scale = parseFloat($scope.scale);
-					if (scale > 0 && scale <= 5) {
-						$scope.scale = wsPdfDelegate.$getByHandle($scope.delegateHandle).updateScale(scale);
-					}
-				}
-			}],
-			link: function (scope) {
-				if (scope.delegateHandle) {
-					scope.init();
-				}
-			}
-		}
-	}
-}());
+                /**
+                 * Переход на определенную страницу
+                 */
+                function goToSelectedPage() {
+                    goToPage(scope.currentPage);
+                }
+
+                /**
+                 * Переход на выбранную страницу
+                 * @param page Номер страницы
+                 */
+                function goToPage(page) {
+                    // Проверяем что такая страница есть
+                    if (page && parseInt(page) && page <= scope.pagesCountValue && page > 0) {
+                        var pageNumber = parseInt(page);
+                        viewerService.setPage(pageNumber)
+                            .then(function (pageNumber) {
+                                communicationService.execute('onScrollToPage', pageNumber);
+                            });
+                    }
+                }
+
+                function getCurrentPage() {
+                    return scope.currentPage;
+                }
+
+                /**
+                 * Приближение
+                 */
+                function zoomIn() {
+                    var targetSize = parseFloat(scope.scale.value) + config.zoomStep;
+                    setScale(targetSize);
+                }
+
+                /**
+                 * Отдаление
+                 */
+                function zoomOut() {
+                    var targetSize = parseFloat(scope.scale.value) - config.zoomStep;
+                    setScale(targetSize);
+                }
+
+                /**
+                 * Toggle thumbnails display mode
+                 *
+                 * @param {Boolean} isThumbnails
+                 */
+                function toggleThumbnails(isThumbnails) {
+                    if (isThumbnails) {
+                        element.addClass(config.classes.thumbnails);
+                    } else {
+                        element.removeClass(config.classes.thumbnails);
+                    }
+                }
+
+                /**
+                 * Обновление масштаба
+                 * @param scale {number|string|Object} Возможные варианты:
+                 * @param scale.name {string}
+                 * @param scale.value {number|string}
+                 *  1. Числовое значение масштаба
+                 *  2. actual - по размеру документа
+                 *  3. width - по ширине страницы
+                 *  4. height - по высоте страницы
+                 *  5. auto - автоматически подбор масштаба
+                 */
+                function setScale(scale) {
+                    var currentPage = scope.currentPage;
+                    // Проверяем что передано значение
+                    if (!scale) {
+                        // Если не передано - берём текущее
+                        scale = scope.scale.value;
+                    } else if (scale.name && scale.value) {
+                        // Если значение - объект с полями name и value
+                        // Берём значение
+                        scale = scale.value;
+                    }
+                    // Парсим масштаб, который хотим установить
+                    var targetSize = parseFloat(scale);
+                    // Проверяем что пытаемся установить значение от 0% до 500%
+                    // Если не запарсилось - считаем что пришёл один из пресетов
+                    if (!isNaN(targetSize)) {
+                        if (targetSize <= 0 || targetSize > 5) {
+                            return;
+                        }
+                    } else {
+                        targetSize = scale;
+                    }
+                    // Берём контейнер со страницами. Он необходим чтобы взять его размеры
+                    viewerService.setScale(targetSize, {
+                        width: pdfContainerDiv[0].clientWidth,
+                        height: pdfContainerDiv[0].clientHeight
+                    })
+                        .then(function(newScale) {
+                            // В значение контроллера устаналивается
+                            scope.scale = {
+                                name: (newScale * 100).toFixed() + '%',
+                                value: newScale
+                            };
+                            // Скролим к нужной странице
+                            goToPage(currentPage);
+                        });
+                }
+            }
+        }
+    }
+})();
