@@ -1,0 +1,171 @@
+$toolbar-width: 380px;
+$toolbar-height: 30px;
+
+.ya-pdf-container {
+  text-align: center;
+  overflow-y: auto;
+  height: calc(100vh - #{$toolbar-height} - 10px);
+  padding-top: calc(#{$toolbar-height} + 10px);
+
+  &.__thumbnails {
+    .ya-pdf-pagesContainer {
+      display: none;
+    }
+
+    .ya-pdf-thumbnailsContainer {
+      display: block;
+    }
+  }
+
+  &.__full {
+
+  }
+
+  .ya-pdf-pagesContainer {
+    .ya-pdf-pageContainer {
+      margin: 1px auto 1px auto;
+      position: relative;
+      background-color: #fff;
+
+      &.__hidden {
+        canvas,
+        .ya-pdf-textContainer {
+          display: none;
+        }
+      }
+
+      canvas {
+        border: 1px outset;
+      }
+
+      .ya-pdf-pagePlaceholder {
+        border: 2px outset;
+        margin: 1px auto 1px auto;
+        background-color: #fff;
+      }
+
+      .ya-pdf-textContainer {
+        position: absolute;
+        top: -2px;
+        left: 2px;
+        right: 2px;
+        bottom: -2px;
+        height: inherit;
+        width: inherit;
+
+        div {
+          color: transparent;
+          position: absolute;
+          white-space: pre;
+          cursor: text;
+          transform-origin: 0% 0%;
+        }
+        div::selection {
+          background-color: rgba(0, 0, 255, 0.3);
+        }
+
+        span.highlight {
+          margin: -1px;
+          padding: 0 1px 4px 1px;
+          background-color: rgba(247, 255, 0, 0.3);
+          border-radius: 4px;
+        }
+        span.selected {
+          background-color: rgba(255, 0, 3, 0.68);
+        }
+      }
+    }
+
+    .ya-pdf-pageNumber {
+      height: 0;
+    }
+  }
+
+  .ya-pdf-thumbnailsContainer {
+    display: none;
+
+    .ya-pdf-thumbnail-pageNumber {
+        display: none;
+    }
+
+    img {
+      background-color: #fff;
+      width: 306px;
+      height: 396px;
+    }
+  }
+}
+
+.ya-pdf-outlineContainer {
+  position: absolute;
+  width: 200px;
+  height: 885px;
+  top: 10px;
+  z-index: 1000;
+  background-color: white;
+
+  &.__hidden {
+    display: none;
+  }
+}
+
+.ya-pdf-toolbar {
+  position: absolute;
+  width: $toolbar-width;
+  height: $toolbar-height;
+  left: calc(50% - #{$toolbar-width} / 2);
+  z-index: 1;
+  background-color: gray;
+
+  div {
+    display: inline-block;
+
+    input {
+      width: 30px;
+    }
+  }
+
+  i {
+    padding-top: 5px;
+  }
+
+  .search-group {
+    .search-field {
+
+      &-found {
+        .search-counter,
+        .search-next,
+        .search-prev {
+          display: block;
+        }
+      }
+    }
+
+    input {
+      width: 125px;
+    }
+
+    .search-counter {
+      position: absolute;
+      display: none;
+      color: rgb(171, 171, 171);
+      right: 77px;
+      top: 8px;
+      font-size: 12px;
+    }
+
+    .search-next {
+      right: 9px;
+      top: 0;
+      position: absolute;
+      display: none;
+    }
+
+    .search-prev {
+      right: 32px;
+      top: 0;
+      position: absolute;
+      display: none;
+    }
+  }
+}
