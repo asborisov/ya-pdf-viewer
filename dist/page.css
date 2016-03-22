@@ -79,7 +79,7 @@
     .ya-pdf-toolbar div input {
       width: 30px; }
   .ya-pdf-toolbar i {
-    top: 4px; }
+    padding-top: 5px; }
   .ya-pdf-toolbar .search-group .search-field-found .search-counter,
   .ya-pdf-toolbar .search-group .search-field-found .search-next,
   .ya-pdf-toolbar .search-group .search-field-found .search-prev {
@@ -91,15 +91,15 @@
     display: none;
     color: #ababab;
     right: 77px;
-    top: 4px;
+    top: 8px;
     font-size: 12px; }
   .ya-pdf-toolbar .search-group .search-next {
     right: 9px;
-    top: 2px;
+    top: 0;
     position: absolute;
     display: none; }
   .ya-pdf-toolbar .search-group .search-prev {
     right: 32px;
-    top: 2px;
+    top: 0;
     position: absolute;
     display: none; }
