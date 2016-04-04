@@ -13,7 +13,7 @@ gulp.task('default', ['style'], function() {
 	return gulp.src(['src/yaPdf.js', 'src/services/*.js', 'src/ya*.js'])
 		.pipe(jshint())
 		.pipe(concat('ya-pdf.js'))
-		.pipe(uglify())
+		// .pipe(uglify())
 		.pipe(gulp.dest('dist'));
 });
 
@@ -22,6 +22,10 @@ gulp.task('style', function() {
 		.pipe(sass())
 		.pipe(autoprefixer())
 		.pipe(gulp.dest('dist'));
+});
+
+gulp.task('dev', ['demo'], function () {
+	gulp.watch(['src/**/*.*'], ['default']);
 });
 
 gulp.task('demo', ['default'], function() {

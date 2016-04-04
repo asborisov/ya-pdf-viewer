@@ -127,7 +127,8 @@
                         onOutlineToggled: toggleOutline,
                         onSetPageSize: setPageSize,
                         onScrollToPage: scrollToPage,
-                        onScrollToDiv: scrollToDiv
+                        onScrollToDiv: scrollToDiv,
+                        onPrintingPageRender: _renderPrintingPage
                     });
                     // Initialize viewer service
                     viewerService.initialize()
@@ -359,6 +360,7 @@
                  * Clear selected page. Remove all child nodes
                  * @param {Number} pageNumber Page to clean
                  * @param {Boolean} purge If we really want to delete all child
+                 * @private
                  */
                 function _clearPage(pageNumber, purge) {
                     var pageDiv = angular.element('#ya-pdf-page-' + pageNumber);
@@ -383,6 +385,7 @@
                 /**
                  * Render selected page
                  * @param {Number} pageNumber
+                 * @private
                  */
                 function _renderPage(pageNumber) {
                     viewerService.getPage(pageNumber)
@@ -426,6 +429,52 @@
                                 renderTextLayer(pageData);
                                 textLayer.attr('rendered', true);
                             }
+                        });
+                }
+
+                /**
+                 * Render selected page for printing
+                 * @param {Numebr} pageNumber
+                 * @private
+                 */
+                function _renderPrintingPage(pageNumber) {
+                    viewerService.getPage(pageNumber)
+                        .then(function(pageData) {
+                            var printingContainer = angular.element('.' + config.classes.printingContainer)[0];
+                            var pageDiv = angular.element('<div></div>')[0];
+
+                            var canvas = angular.element('<canvas></canvas>')[0];
+                            pageDiv.appendChild(canvas);
+                            printingContainer.appendChild(pageDiv);
+
+                            var viewport = pageData.getViewport(1);
+                            canvas.width = Math.floor(viewport.width) * 2;
+                            canvas.height = Math.floor(viewport.height) * 2;
+                            console.log(pageNumber, canvas.height);
+
+                            canvas.style.width = '200%';
+                            canvas.style.height = '200%';
+
+                            pageDiv.style.width = viewport.width + 'pt';
+                            pageDiv.style.height = viewport.height + 'pt';
+
+                            canvas.style.transform = 'scale(0.5,0.5)';
+                            canvas.style.transformOrigin = '0% 0%';
+
+                            var ctx = canvas.getContext('2d');
+                            ctx.save();
+                            ctx.fillStyle = 'rgb(255, 255, 255)';
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            ctx.restore();
+                            ctx.scale(2, 2);
+
+                            var renderContext = {
+                                canvasContext: ctx,
+                                viewport: viewport,
+                                intent: 'print'
+                            };
+                            // Render page
+                            pageData.render(renderContext);
                         });
                 }
 
