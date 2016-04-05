@@ -128,7 +128,7 @@
                         onSetPageSize: setPageSize,
                         onScrollToPage: scrollToPage,
                         onScrollToDiv: scrollToDiv,
-                        onPrintingPageRender: _renderPrintingPage
+                        onPrintingDocument: printDocument,
                     });
                     // Initialize viewer service
                     viewerService.initialize()
@@ -432,13 +432,44 @@
                         });
                 }
 
+                function printDocument() {
+                    var body = angular.element('body');
+                    body.addClass('ya-pdf-hide-page');
+                    var printingContainer = angular.element('<div></div>');
+                    printingContainer.addClass('ya-pdf-printingContainer');
+                    body.append(printingContainer);
+
+                    var pageStyleSheet = angular.element('<style type=\'text/css\'></style>')[0];
+                    documentService.getPageViewport(1, 1)
+                        .then(function(pageSize) {
+                            pageStyleSheet.textContent = 
+                            // "size:<width> <height>" is what we need. But also add "A4" because
+                            // Firefox incorrectly reports support for the other value.
+                            '@supports ((size:A4) and (size:1pt 1pt)) {' +
+                            '@page { size: ' + pageSize.width + 'pt ' + pageSize.height + 'pt;}}';
+                        body.append(pageStyleSheet);
+
+                        var promises = [];
+                        for (var i = 1; i <= documentService.getPagesCount(); i++) {
+                            promises.push(_renderPrintingPage(pageNumber));
+                        }
+                        
+                        $q.all(promises)
+                            .then(function() {
+                                $window.print();
+                                // body.removeClass('ya-pdf-hide-page');
+                                // printingContainer.remove();
+                            })
+                        });
+                }
+
                 /**
                  * Render selected page for printing
                  * @param {Numebr} pageNumber
                  * @private
                  */
                 function _renderPrintingPage(pageNumber) {
-                    viewerService.getPage(pageNumber)
+                    return viewerService.getPage(pageNumber)
                         .then(function(pageData) {
                             var printingContainer = angular.element('.' + config.classes.printingContainer)[0];
                             var pageDiv = angular.element('<div></div>')[0];
@@ -474,7 +505,7 @@
                                 intent: 'print'
                             };
                             // Render page
-                            pageData.render(renderContext);
+                            return pageData.render(renderContext);
                         });
                 }
 

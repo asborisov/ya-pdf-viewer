@@ -128,7 +128,7 @@
                 scope.findPrev = viewerService.findPrev;
                 scope.currentSelected = viewerService.currentSelected;
                 scope.foundCount = viewerService.foundCount;
-                scope.print = function() {return viewerService.print();}
+                scope.print = printDocument;
 
                 scope.getCurrentPage = getCurrentPage;
 
@@ -296,6 +296,10 @@
                             // Скролим к нужной странице
                             goToPage(currentPage);
                         });
+                }
+
+                function printDocument() {
+                    communicationService.execute('onPrintingDocument');
                 }
             }
         }

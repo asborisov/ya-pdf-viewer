@@ -114,8 +114,6 @@
             getOutline: outlineService.getOutline,
             navigateTo: outlineService.navigateTo,
 
-            print: print,
-
             set documentScale(value) {
                 setScale(value);
             },
@@ -322,37 +320,7 @@
         function setThumbnails() {
             thumbnails = !thumbnails;
             communicationService.execute('onThumbnailsToggled', thumbnails);
-        }
-
-        function print() {
-            var body = angular.element('body');
-            body.addClass('ya-pdf-hide-page');
-            var printingContainer = angular.element('<div></div>');
-            printingContainer.addClass('ya-pdf-printingContainer');
-            body.append(printingContainer);
-
-            var pageStyleSheet = angular.element('<style type=\'text/css\'></style>')[0];
-            documentService.getPageViewport(1, 1)
-                .then(function(pageSize) {
-                    pageStyleSheet.textContent = 
-                    // "size:<width> <height>" is what we need. But also add "A4" because
-                    // Firefox incorrectly reports support for the other value.
-                    '@supports ((size:A4) and (size:1pt 1pt)) {' +
-                    '@page { size: ' + pageSize.width + 'pt ' + pageSize.height + 'pt;}}';
-                body.append(pageStyleSheet);
-
-                for (var i = 1; i <= documentService.getPagesCount(); i++) {
-                    communicationService.execute('onPrintingPageRender', i);
-                }
-                
-                $timeout(function() {$window.print();}, 2000);
-                
-
-                // body.removeClass('ya-pdf-hide-page');
-                // printingContainer.remove();
-                });
-        }
-            
+        }            
 
         /**
          * Black magic to generate download link and click it via service
