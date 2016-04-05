@@ -248,10 +248,11 @@
          * Get viewport of selected page with current scale
          *
          * @param {Number} pageNumber
+         * @param {Number} [scale=documentScale]
          * @returns {Promise}
          */
-        function getPageViewport(pageNumber) {
-            return documentService.getPageViewport(pageNumber, documentScale);
+        function getPageViewport(pageNumber, scale) {
+            return documentService.getPageViewport(pageNumber, scale || documentScale);
         }
 
         /**
@@ -320,7 +321,7 @@
         function setThumbnails() {
             thumbnails = !thumbnails;
             communicationService.execute('onThumbnailsToggled', thumbnails);
-        }            
+        }
 
         /**
          * Black magic to generate download link and click it via service

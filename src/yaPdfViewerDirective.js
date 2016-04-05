@@ -50,9 +50,9 @@
      * @param viewerService
      * @returns {{restrict: string, template: string, scope: {delegateHandle: string, pdfUrl: string, startPage: string, startScale: string, onLoaded: string, onError: string, onProgress: string, onRenderStart: string, onRenderEnd: string}, controller: *[], link: Function}}
      */
-    yaPdfViewer.$inject = ['$window', '$timeout', 'ya.pdf.communicationService', 'ya.pdf.viewerService', 'ya.pdf.config'];
+    yaPdfViewer.$inject = ['$window', '$timeout', '$q', 'ya.pdf.communicationService', 'ya.pdf.viewerService', 'ya.pdf.config'];
 
-    function yaPdfViewer($window, $timeout, communicationService, viewerService, config) {
+    function yaPdfViewer($window, $timeout, $q, communicationService, viewerService, config) {
         return {
             restrict: 'E',
             templateUrl: function (element, attr) {
@@ -434,13 +434,13 @@
 
                 function printDocument() {
                     var body = angular.element('body');
-                    body.addClass('ya-pdf-hide-page');
+                    body.addClass(config.classes.hidePages);
                     var printingContainer = angular.element('<div></div>');
-                    printingContainer.addClass('ya-pdf-printingContainer');
+                    printingContainer.addClass(config.classes.printingContainer);
                     body.append(printingContainer);
 
                     var pageStyleSheet = angular.element('<style type=\'text/css\'></style>')[0];
-                    documentService.getPageViewport(1, 1)
+                    viewerService.getPageViewport(1, 1)
                         .then(function(pageSize) {
                             pageStyleSheet.textContent = 
                             // "size:<width> <height>" is what we need. But also add "A4" because
@@ -450,22 +450,22 @@
                         body.append(pageStyleSheet);
 
                         var promises = [];
-                        for (var i = 1; i <= documentService.getPagesCount(); i++) {
-                            promises.push(_renderPrintingPage(pageNumber));
+                        for (var i = 1; i <= viewerService.getPagesCount(); i++) {
+                            promises.push(_renderPrintingPage(i));
                         }
                         
                         $q.all(promises)
                             .then(function() {
                                 $window.print();
-                                // body.removeClass('ya-pdf-hide-page');
-                                // printingContainer.remove();
+                                body.removeClass(config.classes.hidePages);
+                                printingContainer.remove();
                             })
                         });
                 }
 
                 /**
                  * Render selected page for printing
-                 * @param {Numebr} pageNumber
+                 * @param {Number} pageNumber
                  * @private
                  */
                 function _renderPrintingPage(pageNumber) {
