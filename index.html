@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html ng-app="test">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>ya-pdf demo</title>
+
+	<link rel="stylesheet" type="text/css" href="../dist/page.css">
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+</head>
+<body style="height: 100vh; overflow: hidden; margin: 0;">
+	<div style="height: 100vh">
+		<ya-pdf-toolbar></ya-pdf-toolbar>
+		<ya-pdf-viewer ya-pdf-url="compressed.tracemonkey-pldi-09.pdf"></ya-pdf-viewer>
+	</div>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
+	<script type="text/javascript" src="../node_modules/pdfjs-dist/build/pdf.combined.js"></script>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
+	<script type="text/javascript" src="../dist/ya-pdf.js"></script>
+	<script type="text/javascript" src="app.js"></script>
+</body>
+</html>
