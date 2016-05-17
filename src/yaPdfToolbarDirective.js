@@ -57,6 +57,11 @@
             '       </form>' +
             '      </div>' +
             '   </div>' +
+            '   <div class="btn-group">' +
+            '       <div ng-click="print()">' +
+            '           <i class="fa fa-print fa-lg"></i>' +
+            '       </div>' +
+            '   </div>' +
             '</div>')
     }
 
@@ -123,6 +128,7 @@
                 scope.findPrev = viewerService.findPrev;
                 scope.currentSelected = viewerService.currentSelected;
                 scope.foundCount = viewerService.foundCount;
+                scope.print = printDocument;
 
                 scope.getCurrentPage = getCurrentPage;
 
@@ -290,6 +296,10 @@
                             // Скролим к нужной странице
                             goToPage(currentPage);
                         });
+                }
+
+                function printDocument() {
+                    communicationService.execute('onPrintingDocument');
                 }
             }
         }

@@ -50,9 +50,9 @@
      * @param viewerService
      * @returns {{restrict: string, template: string, scope: {delegateHandle: string, pdfUrl: string, startPage: string, startScale: string, onLoaded: string, onError: string, onProgress: string, onRenderStart: string, onRenderEnd: string}, controller: *[], link: Function}}
      */
-    yaPdfViewer.$inject = ['$window', '$timeout', 'ya.pdf.communicationService', 'ya.pdf.viewerService', 'ya.pdf.config'];
+    yaPdfViewer.$inject = ['$window', '$timeout', '$q', 'ya.pdf.communicationService', 'ya.pdf.viewerService', 'ya.pdf.config'];
 
-    function yaPdfViewer($window, $timeout, communicationService, viewerService, config) {
+    function yaPdfViewer($window, $timeout, $q, communicationService, viewerService, config) {
         return {
             restrict: 'E',
             templateUrl: function (element, attr) {
@@ -127,7 +127,8 @@
                         onOutlineToggled: toggleOutline,
                         onSetPageSize: setPageSize,
                         onScrollToPage: scrollToPage,
-                        onScrollToDiv: scrollToDiv
+                        onScrollToDiv: scrollToDiv,
+                        onPrintingDocument: printDocument,
                     });
                     // Initialize viewer service
                     viewerService.initialize()
@@ -359,6 +360,7 @@
                  * Clear selected page. Remove all child nodes
                  * @param {Number} pageNumber Page to clean
                  * @param {Boolean} purge If we really want to delete all child
+                 * @private
                  */
                 function _clearPage(pageNumber, purge) {
                     var pageDiv = angular.element('#ya-pdf-page-' + pageNumber);
@@ -383,6 +385,7 @@
                 /**
                  * Render selected page
                  * @param {Number} pageNumber
+                 * @private
                  */
                 function _renderPage(pageNumber) {
                     viewerService.getPage(pageNumber)
@@ -426,6 +429,83 @@
                                 renderTextLayer(pageData);
                                 textLayer.attr('rendered', true);
                             }
+                        });
+                }
+
+                function printDocument() {
+                    var body = angular.element('body');
+                    body.addClass(config.classes.hidePages);
+                    var printingContainer = angular.element('<div></div>');
+                    printingContainer.addClass(config.classes.printingContainer);
+                    body.append(printingContainer);
+
+                    var pageStyleSheet = angular.element('<style type=\'text/css\'></style>')[0];
+                    viewerService.getPageViewport(1, 1)
+                        .then(function(pageSize) {
+                            pageStyleSheet.textContent = 
+                            // "size:<width> <height>" is what we need. But also add "A4" because
+                            // Firefox incorrectly reports support for the other value.
+                            '@supports ((size:A4) and (size:1pt 1pt)) {' +
+                            '@page { size: ' + pageSize.width + 'pt ' + pageSize.height + 'pt;}}';
+                        body.append(pageStyleSheet);
+
+                        var promises = [];
+                        for (var i = 1; i <= viewerService.getPagesCount(); i++) {
+                            promises.push(_renderPrintingPage(i));
+                        }
+                        
+                        $q.all(promises)
+                            .then(function() {
+                                $window.print();
+                                body.removeClass(config.classes.hidePages);
+                                printingContainer.remove();
+                            })
+                        });
+                }
+
+                /**
+                 * Render selected page for printing
+                 * @param {Number} pageNumber
+                 * @private
+                 */
+                function _renderPrintingPage(pageNumber) {
+                    return viewerService.getPage(pageNumber)
+                        .then(function(pageData) {
+                            var printingContainer = angular.element('.' + config.classes.printingContainer)[0];
+                            var pageDiv = angular.element('<div></div>')[0];
+
+                            var canvas = angular.element('<canvas></canvas>')[0];
+                            pageDiv.appendChild(canvas);
+                            printingContainer.appendChild(pageDiv);
+
+                            var viewport = pageData.getViewport(1);
+                            canvas.width = Math.floor(viewport.width) * 2;
+                            canvas.height = Math.floor(viewport.height) * 2;
+                            console.log(pageNumber, canvas.height);
+
+                            canvas.style.width = '200%';
+                            canvas.style.height = '200%';
+
+                            pageDiv.style.width = viewport.width + 'pt';
+                            pageDiv.style.height = viewport.height + 'pt';
+
+                            canvas.style.transform = 'scale(0.5,0.5)';
+                            canvas.style.transformOrigin = '0% 0%';
+
+                            var ctx = canvas.getContext('2d');
+                            ctx.save();
+                            ctx.fillStyle = 'rgb(255, 255, 255)';
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            ctx.restore();
+                            ctx.scale(2, 2);
+
+                            var renderContext = {
+                                canvasContext: ctx,
+                                viewport: viewport,
+                                intent: 'print'
+                            };
+                            // Render page
+                            return pageData.render(renderContext);
                         });
                 }
 

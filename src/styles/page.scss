@@ -1,6 +1,46 @@
 $toolbar-width: 380px;
 $toolbar-height: 30px;
 
+@media print {
+    /* General rules for printing. */
+    body {
+        background: transparent none;
+    }
+
+    .ya-pdf-container {
+        overflow: visible;
+    }
+
+    /* wrapper around (scaled) print canvas elements */
+    .ya-pdf-printingContainer > div {
+        position: relative;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+    }
+
+    .ya-pdf-printingContainer canvas {
+        display: block;
+    }
+}
+
+/* Class that hidden all unnecessary elements and display printingContainer */
+.ya-pdf-hide-page {
+    overflow: auto;
+  > div {
+    display: none;
+  }
+
+  .ya-pdf-printingContainer {
+    display: block;
+
+    * {
+      padding: 0;
+      margin: 0;
+    }
+  }
+}
+
 .ya-pdf-container {
   text-align: center;
   overflow-y: auto;
@@ -130,7 +170,10 @@ $toolbar-height: 30px;
   }
 
   .search-group {
+    width: 167px;
+
     .search-field {
+      position: relative;
 
       &-found {
         .search-counter,
@@ -149,21 +192,21 @@ $toolbar-height: 30px;
       position: absolute;
       display: none;
       color: rgb(171, 171, 171);
-      right: 77px;
-      top: 8px;
+      right: 10px;
+      top: 5px;
       font-size: 12px;
     }
 
     .search-next {
-      right: 9px;
-      top: 0;
+      right: -20px;
+      top: -2px;
       position: absolute;
       display: none;
     }
 
     .search-prev {
-      right: 32px;
-      top: 0;
+      right: -38px;
+      top: -2px;
       position: absolute;
       display: none;
     }

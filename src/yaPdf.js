@@ -24,7 +24,9 @@
                 textContainer: 'ya-pdf-textContainer',
                 outlineContainer: 'ya-pdf-outlineContainer',
                 pageNumber: 'ya-pdf-pageNumber',
-                toolbar: 'ya-pdf-toolbar'
+                toolbar: 'ya-pdf-toolbar',
+                printingContainer: 'ya-pdf-printingContainer',
+                hidePages: 'ya-pdf-hide-page'
             },
             zoomStep: 0.2,
             maxAutoZoom: 1.25,

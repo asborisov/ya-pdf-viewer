@@ -1,3 +1,29 @@
+@media print {
+  /* General rules for printing. */
+  body {
+    background: transparent none; }
+  .ya-pdf-container {
+    overflow: visible; }
+  /* wrapper around (scaled) print canvas elements */
+  .ya-pdf-printingContainer > div {
+    position: relative;
+    top: 0;
+    left: 0;
+    overflow: hidden; }
+  .ya-pdf-printingContainer canvas {
+    display: block; } }
+
+/* Class that hidden all unnecessary elements and display printingContainer */
+.ya-pdf-hide-page {
+  overflow: auto; }
+  .ya-pdf-hide-page > div {
+    display: none; }
+  .ya-pdf-hide-page .ya-pdf-printingContainer {
+    display: block; }
+    .ya-pdf-hide-page .ya-pdf-printingContainer * {
+      padding: 0;
+      margin: 0; }
+
 .ya-pdf-container {
   text-align: center;
   overflow-y: auto;
@@ -80,26 +106,30 @@
       width: 30px; }
   .ya-pdf-toolbar i {
     padding-top: 5px; }
-  .ya-pdf-toolbar .search-group .search-field-found .search-counter,
-  .ya-pdf-toolbar .search-group .search-field-found .search-next,
-  .ya-pdf-toolbar .search-group .search-field-found .search-prev {
-    display: block; }
-  .ya-pdf-toolbar .search-group input {
-    width: 125px; }
-  .ya-pdf-toolbar .search-group .search-counter {
-    position: absolute;
-    display: none;
-    color: #ababab;
-    right: 77px;
-    top: 8px;
-    font-size: 12px; }
-  .ya-pdf-toolbar .search-group .search-next {
-    right: 9px;
-    top: 0;
-    position: absolute;
-    display: none; }
-  .ya-pdf-toolbar .search-group .search-prev {
-    right: 32px;
-    top: 0;
-    position: absolute;
-    display: none; }
+  .ya-pdf-toolbar .search-group {
+    width: 167px; }
+    .ya-pdf-toolbar .search-group .search-field {
+      position: relative; }
+      .ya-pdf-toolbar .search-group .search-field-found .search-counter,
+      .ya-pdf-toolbar .search-group .search-field-found .search-next,
+      .ya-pdf-toolbar .search-group .search-field-found .search-prev {
+        display: block; }
+    .ya-pdf-toolbar .search-group input {
+      width: 125px; }
+    .ya-pdf-toolbar .search-group .search-counter {
+      position: absolute;
+      display: none;
+      color: #ababab;
+      right: 10px;
+      top: 5px;
+      font-size: 12px; }
+    .ya-pdf-toolbar .search-group .search-next {
+      right: -20px;
+      top: -2px;
+      position: absolute;
+      display: none; }
+    .ya-pdf-toolbar .search-group .search-prev {
+      right: -38px;
+      top: -2px;
+      position: absolute;
+      display: none; }
