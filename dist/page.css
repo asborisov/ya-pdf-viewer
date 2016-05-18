@@ -73,7 +73,7 @@
       .ya-pdf-container .ya-pdf-pagesContainer .ya-pdf-pageContainer .ya-pdf-textContainer span.selected {
         background-color: rgba(255, 0, 3, 0.68); }
   .ya-pdf-container .ya-pdf-pagesContainer .ya-pdf-pageNumber {
-    height: 0; }
+    height: 18px; }
   .ya-pdf-container .ya-pdf-thumbnailsContainer {
     display: none; }
     .ya-pdf-container .ya-pdf-thumbnailsContainer .ya-pdf-thumbnail-pageNumber {
