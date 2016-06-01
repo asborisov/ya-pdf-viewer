@@ -5,7 +5,9 @@
     "dist/ya-pdf.js"
   ],
   "dependencies": {
-    "angular": "^1.5.0"
+    "angular": "^1.5.0",
+    "lodash": "^4.12.0",
+    "pdfjs-dist": "^1.5.0"
   },
   "authors": [
     "Artem Borisov <timan.b@gmail.com>"

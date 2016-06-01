@@ -9,7 +9,7 @@
   "dependencies": {
     "angular": "^1.5.0",
     "lodash": "^4.12.0",
-    "pdfjs-dist": "^1.1.469"
+    "pdfjs-dist": "^1.5.0"
   },
   "devDependencies": {
     "babel-core": "^6.7.4",
