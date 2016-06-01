@@ -1,0 +1,16 @@
+{
+  "name": "ya-pdf-viewer",
+  "description": "Angular directive for display PDF files",
+  "main": [
+    "dist/ya-pdf.js"
+  ],
+  "dependencies": {
+    "angular": "^1.5.0"
+  },
+  "authors": [
+    "Artem Borisov <timan.b@gmail.com>"
+  ],
+  "license": "APSL-2.0",
+  "ignore": [],
+  "private": false
+}
