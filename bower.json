@@ -2,7 +2,8 @@
   "name": "ya-pdf-viewer",
   "description": "Angular directive for display PDF files",
   "main": [
-    "dist/ya-pdf.js"
+    "dist/ya-pdf.js",
+    "dist/page.css"
   ],
   "dependencies": {
     "angular": "^1.5.0",
